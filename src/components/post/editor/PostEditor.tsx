@@ -9,17 +9,13 @@ import UserAvatar from "@/components/UserAvatar";
 import { useSession } from "@/app/(main)/SessionProvider";
 import { Button } from "@/components/ui/button";
 import "./style.css";
+import { useSubmitPostMutation } from "./mutation";
+import LoadingButton from "@/components/LoadingButton";
 
 // Component to render only on client-side
 export default function PostEditor() {
   const { user } = useSession();
-  const [isClient, setIsClient] = useState(false);
-
-  // Set isClient to true after initial render
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
+  const mutation = useSubmitPostMutation();
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -40,15 +36,15 @@ export default function PostEditor() {
 
   async function onSubmit() {
     try {
-      await submitPost(input);
+      mutation.mutate(input, {
+        onSuccess: () => {
+          editor?.commands.clearContent();
+        },
+      });
       editor?.commands.clearContent();
     } catch (error) {
       console.log(error);
     }
-  }
-
-  if (!isClient) {
-    return null; // Render nothing on the server-side
   }
 
   return (
@@ -64,13 +60,14 @@ export default function PostEditor() {
         />
       </div>
       <div className="flex justify-end">
-        <Button
+        <LoadingButton
           onClick={onSubmit}
           disabled={!input.trim()}
           className="min-w-20"
+          loading={mutation.isPending}
         >
           Post
-        </Button>
+        </LoadingButton>
       </div>
     </div>
   );
