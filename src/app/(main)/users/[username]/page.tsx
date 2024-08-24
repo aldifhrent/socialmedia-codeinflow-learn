@@ -1,11 +1,18 @@
 import { validateRequest } from "@/auth";
 import FollowButton from "@/components/FollowButton";
 import FollowerCount from "@/components/FollowerCount";
+import FollowingCount from "@/components/FollowingCount";
+import Linkify from "@/components/Linkify";
 import TrendsSidebar from "@/components/TrendSidebar";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/UserAvatar";
 import prisma from "@/lib/prisma";
-import { FollowerInfo, getUserDataSelect, UserData } from "@/lib/types";
+import {
+  FollowerInfo,
+  FollowingInfo,
+  getUserDataSelect,
+  UserData,
+} from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import { formatDate } from "date-fns";
 import { notFound } from "next/navigation";
@@ -46,7 +53,7 @@ export default async function page({ params: { username } }: PageProps) {
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) {
-    return <p>You're not authorized to view this page</p>;
+    return <p>You&apos;re not authorized to view this page</p>;
   }
 
   const user = await getUser(username, loggedInUser.id);
@@ -73,6 +80,10 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
     ),
   };
 
+  const followingInfo: FollowingInfo = {
+    following: user._count.following,
+  };
+
   return (
     <div className="h-fit w-full space-y-5 rounded-2xl bg-card p-5 shadow-sm">
       <UserAvatar
@@ -95,6 +106,7 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
               </span>
             </span>
             <FollowerCount userId={user.id} initialState={followerInfo} />
+            <FollowingCount userId={user.id} initialState={followingInfo} />
           </div>
         </div>
         {user.id === loggedInUserId ? (
@@ -106,9 +118,11 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
       {user.bio && (
         <>
           <hr />
-          <div className="overflow-hidden whitespace-pre-line break-words">
-            {user.bio}
-          </div>
+          <Linkify>
+            <div className="overflow-hidden whitespace-pre-line break-words">
+              {user.bio}
+            </div>
+          </Linkify>
         </>
       )}
     </div>

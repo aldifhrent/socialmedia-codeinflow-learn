@@ -8,6 +8,14 @@ export function getUserDataSelect(loggedInUserId: string) {
     avatarUrl: true,
     bio: true,
     createdAt: true,
+    following: {
+      where: {
+        followingId: loggedInUserId,
+      },
+      select: {
+        followingId: true
+      }
+    },
     followers: {
       where: {
         followerId: loggedInUserId,
@@ -20,6 +28,7 @@ export function getUserDataSelect(loggedInUserId: string) {
       select: {
         post: true,
         followers: true,
+        following: true,
       },
     },
   } satisfies Prisma.UserSelect;
@@ -49,4 +58,8 @@ export interface PostsPage {
 export interface FollowerInfo {
   followers: number;
   isFollowedByUser: boolean;
+}
+
+export interface FollowingInfo {
+  following: number;
 }
