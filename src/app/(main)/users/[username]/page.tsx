@@ -17,6 +17,7 @@ import { formatNumber } from "@/lib/utils";
 import { formatDate } from "date-fns";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import EditProfielButton from "./EditProfileButton";
 
 interface PageProps {
   params: { username: string };
@@ -110,7 +111,7 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
           </div>
         </div>
         {user.id === loggedInUserId ? (
-          <Button>Edit Profile</Button>
+          <EditProfielButton user={user}/>
         ) : (
           <FollowButton userId={user.id} initialState={followerInfo} />
         )}
